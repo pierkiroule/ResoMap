@@ -51,6 +51,31 @@
   animation: pulse-performance 2s ease-in-out infinite;
 }
 
+.video-capture-toggle {
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, #ff3366 0%, #ff6b9d 100%);
+  border: 2px solid transparent;
+  color: white;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
+.video-capture-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 51, 102, 0.4);
+}
+
+.video-capture-toggle.active {
+  background: linear-gradient(135deg, #ff6b9d 0%, #ff3366 100%);
+  border-color: #ff3366;
+  box-shadow: 0 0 20px rgba(255, 51, 102, 0.6);
+}
+
 @keyframes pulse-performance {
   0%, 100% {
     box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);

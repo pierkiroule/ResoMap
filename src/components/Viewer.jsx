@@ -1,12 +1,14 @@
 import React, { useRef, useState } from 'react'
 import Layer from './Layer'
 import TouchInteraction from './TouchInteraction'
+import VideoCapture from './VideoCapture'
 import './Viewer.css'
 
 function Viewer({ layers, audioData, audioAnalyzer, onUpdateLayer }) {
   const viewerRef = useRef(null)
   const [backdrop, setBackdrop] = useState('black')
   const [isPerformanceMode, setIsPerformanceMode] = useState(false)
+  const [showVideoCapture, setShowVideoCapture] = useState(false)
 
   const getCanvasStyle = () => {
     switch(backdrop) {
@@ -42,6 +44,14 @@ function Viewer({ layers, audioData, audioAnalyzer, onUpdateLayer }) {
             title={isPerformanceMode ? 'Quitter le mode Performance' : 'Activer le mode Performance'}
           >
             {isPerformanceMode ? '🎭 VJ Mode ON' : '🎬 VJ Mode OFF'}
+          </button>
+
+          <button 
+            className={`video-capture-toggle ${showVideoCapture ? 'active' : ''}`}
+            onClick={() => setShowVideoCapture(!showVideoCapture)}
+            title="Capturer des loops vidéo"
+          >
+            🎥 Loop Recorder
           </button>
           
           {isPerformanceMode && (
@@ -141,6 +151,10 @@ function Viewer({ layers, audioData, audioAnalyzer, onUpdateLayer }) {
           )}
         </div>
       </div>
+
+      {showVideoCapture && (
+        <VideoCapture canvasRef={viewerRef} />
+      )}
     </div>
   )
 }
