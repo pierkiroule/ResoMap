@@ -3,7 +3,7 @@ import ProLayout from './components/ProLayout'
 import ClipBrowser from './components/ClipBrowser'
 import TabsInspector from './components/TabsInspector'
 import Viewer from './components/Viewer'
-import DreamMixer from './components/DreamMixer'
+import SimpleDreamMixer from './components/SimpleDreamMixer'
 import ShortcutsHelp from './components/ShortcutsHelp'
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts'
 import AudioAnalyzer from './utils/AudioAnalyzer'
@@ -234,8 +234,7 @@ function App() {
       </header>
 
       {showDreamMixer ? (
-        <DreamMixer 
-          audioAnalyzer={audioAnalyzerRef.current}
+        <SimpleDreamMixer 
           audioData={audioData}
         />
       ) : (
