@@ -1,6 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react'
-import Editor from './components/Editor'
+import ProLayout from './components/ProLayout'
+import ClipBrowser from './components/ClipBrowser'
+import TabsInspector from './components/TabsInspector'
 import Viewer from './components/Viewer'
+import ShortcutsHelp from './components/ShortcutsHelp'
+import useKeyboardShortcuts from './hooks/useKeyboardShortcuts'
 import AudioAnalyzer from './utils/AudioAnalyzer'
 import './App.css'
 
@@ -8,8 +12,11 @@ function App() {
   const [layers, setLayers] = useState([])
   const [selectedLayerId, setSelectedLayerId] = useState(null)
   const [audioData, setAudioData] = useState({ bass: 0, mid: 0, high: 0, overall: 0 })
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const audioAnalyzerRef = useRef(null)
   const animationFrameRef = useRef(null)
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     // Initialize audio analyzer
@@ -41,7 +48,7 @@ function App() {
       id: Date.now(),
       name: file.name,
       type: getFileType(file),
-      url: URL.createObjectURL(file),
+      src: URL.createObjectURL(file),
       file: file,
       visible: true,
       opacity: 1,
@@ -75,6 +82,16 @@ function App() {
       rotation: 0
     }
     setLayers([...layers, newLayer])
+    setSelectedLayerId(newLayer.id)
+  }
+
+  const handleFileImport = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files || [])
+    files.forEach(file => addLayer(file))
   }
 
   const getFileType = (file) => {
@@ -109,30 +126,134 @@ function App() {
     setLayers(result)
   }
 
+  const selectedLayer = layers.find(l => l.id === selectedLayerId)
+
+  const blendModes = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light']
+
+  // Keyboard shortcuts callbacks
+  const shortcutsCallbacks = {
+    // Navigation
+    selectLayer: (index) => {
+      if (layers[index]) setSelectedLayerId(layers[index].id)
+    },
+    toggleFullscreen: () => setIsFullscreen(!isFullscreen),
+    exitFullscreen: () => setIsFullscreen(false),
+
+    // Édition
+    deleteSelectedLayer: () => {
+      if (selectedLayerId) deleteLayer(selectedLayerId)
+    },
+    duplicateLayer: () => {
+      if (selectedLayer) {
+        const duplicate = { ...selectedLayer, id: Date.now(), name: `${selectedLayer.name} (copy)` }
+        setLayers([...layers, duplicate])
+      }
+    },
+
+    // Performance
+    applyPreset: (preset) => {
+      if (!selectedLayer) return
+      const presets = {
+        vibrant: { filters: { ...selectedLayer.filters, brightness: 120, contrast: 110, saturate: 120 } },
+        dramatic: { filters: { ...selectedLayer.filters, brightness: 90, contrast: 120, saturate: 80 } },
+        blackwhite: { filters: { ...selectedLayer.filters, grayscale: 100, contrast: 110 } },
+        vintage: { filters: { ...selectedLayer.filters, sepia: 80, brightness: 110 } }
+      }
+      if (presets[preset]) updateLayer(selectedLayerId, presets[preset])
+    },
+    toggleChromakey: () => {
+      if (selectedLayer) {
+        updateLayer(selectedLayerId, { 
+          chromaKey: { ...selectedLayer.chromaKey, enabled: !selectedLayer.chromaKey.enabled }
+        })
+      }
+    },
+
+    // Calques
+    moveLayerUp: () => {
+      if (!selectedLayer) return
+      const index = layers.findIndex(l => l.id === selectedLayerId)
+      if (index > 0) reorderLayers(index, index - 1)
+    },
+    moveLayerDown: () => {
+      if (!selectedLayer) return
+      const index = layers.findIndex(l => l.id === selectedLayerId)
+      if (index < layers.length - 1) reorderLayers(index, index + 1)
+    },
+    cycleBlendMode: (direction) => {
+      if (!selectedLayer) return
+      const currentIndex = blendModes.indexOf(selectedLayer.blendMode)
+      const newIndex = (currentIndex + direction + blendModes.length) % blendModes.length
+      updateLayer(selectedLayerId, { blendMode: blendModes[newIndex] })
+    },
+    setLayerOpacity: (opacity) => {
+      if (selectedLayer) updateLayer(selectedLayerId, { opacity })
+    },
+
+    // Help
+    showHelp: () => setShowShortcutsHelp(true)
+  }
+
+  useKeyboardShortcuts(shortcutsCallbacks)
+
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>🌙 Resomap - Générateur de Rêve Multimédia</h1>
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept="image/*,video/*,audio/*"
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
+
+      <header className="app-header-pro">
+        <div className="header-left">
+          <h1>🌙 Resomap</h1>
+          <span className="subtitle">Professional VJ Suite</span>
+        </div>
+        <div className="header-center">
+          <button className="header-btn" onClick={handleFileImport}>
+            + Import Media
+          </button>
+        </div>
+        <div className="header-right">
+          <button className="header-btn" onClick={() => setShowShortcutsHelp(true)} title="Keyboard Shortcuts (?)">
+            ⌨️
+          </button>
+        </div>
       </header>
-      <div className="app-content">
-        <Editor 
-          layers={layers}
-          selectedLayerId={selectedLayerId}
-          onSelectLayer={setSelectedLayerId}
-          onAddLayer={addLayer}
-          onUpdateLayer={updateLayer}
-          onDeleteLayer={deleteLayer}
-          onReorderLayers={reorderLayers}
-          onRestoreSnapshot={restoreSnapshot}
-        />
-        <Viewer 
-          layers={layers}
-          audioData={audioData}
-          audioAnalyzer={audioAnalyzerRef.current}
-          onUpdateLayer={updateLayer}
-          selectedLayer={layers.find(l => l.id === selectedLayerId)}
-        />
-      </div>
+
+      <ProLayout
+        clipBrowser={
+          <ClipBrowser
+            layers={layers}
+            selectedLayer={selectedLayer}
+            onSelectLayer={(layer) => setSelectedLayerId(layer.id)}
+            onDeleteLayer={deleteLayer}
+          />
+        }
+        viewer={
+          <Viewer
+            layers={layers}
+            audioData={audioData}
+            audioAnalyzer={audioAnalyzerRef.current}
+            onUpdateLayer={updateLayer}
+            selectedLayer={selectedLayer}
+          />
+        }
+        inspector={
+          <TabsInspector
+            layer={selectedLayer}
+            onUpdateLayer={updateLayer}
+          />
+        }
+        onToggleFullscreen={(fullscreen) => setIsFullscreen(fullscreen)}
+      />
+
+      {showShortcutsHelp && (
+        <ShortcutsHelp onClose={() => setShowShortcutsHelp(false)} />
+      )}
     </div>
   )
 }
