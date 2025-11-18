@@ -2,13 +2,15 @@ import React, { useRef, useState } from 'react'
 import Layer from './Layer'
 import TouchInteraction from './TouchInteraction'
 import VideoCapture from './VideoCapture'
+import FloatingPanel from './FloatingPanel'
 import './Viewer.css'
 
-function Viewer({ layers, audioData, audioAnalyzer, onUpdateLayer }) {
+function Viewer({ layers, audioData, audioAnalyzer, onUpdateLayer, selectedLayer }) {
   const viewerRef = useRef(null)
   const [backdrop, setBackdrop] = useState('black')
   const [isPerformanceMode, setIsPerformanceMode] = useState(false)
   const [showVideoCapture, setShowVideoCapture] = useState(false)
+  const [showLayerProps, setShowLayerProps] = useState(false)
 
   const getCanvasStyle = () => {
     switch(backdrop) {
@@ -155,6 +157,149 @@ function Viewer({ layers, audioData, audioAnalyzer, onUpdateLayer }) {
       {showVideoCapture && (
         <VideoCapture canvasRef={viewerRef} />
       )}
+
+      {selectedLayer && showLayerProps && (
+        <FloatingPanel
+          title={`⚙️ ${selectedLayer.name}`}
+          defaultPosition={{ x: window.innerWidth - 360, y: 100 }}
+          defaultSize={{ width: 340, height: 'auto' }}
+          onClose={() => setShowLayerProps(false)}
+        >
+          <LayerProperties 
+            layer={selectedLayer}
+            onUpdateLayer={onUpdateLayer}
+          />
+        </FloatingPanel>
+      )}
+
+      {/* Floating button to open props */}
+      {isPerformanceMode && selectedLayer && !showLayerProps && (
+        <button 
+          className="floating-props-trigger"
+          onClick={() => setShowLayerProps(true)}
+          title="Ouvrir les propriétés"
+        >
+          ⚙️
+        </button>
+      )}
+    </div>
+  )
+}
+
+// Extract layer properties into separate component
+function LayerProperties({ layer, onUpdateLayer }) {
+  return (
+    <div className="floating-layer-properties">
+      <div className="property-section">
+        <h4>Transformation</h4>
+        
+        <label>
+          <span>Opacité</span>
+          <input 
+            type="range" 
+            min="0" 
+            max="1" 
+            step="0.01"
+            value={layer.opacity}
+            onChange={(e) => onUpdateLayer(layer.id, { opacity: parseFloat(e.target.value) })}
+          />
+          <span className="value">{(layer.opacity * 100).toFixed(0)}%</span>
+        </label>
+
+        <label>
+          <span>Échelle</span>
+          <input 
+            type="range" 
+            min="0.1" 
+            max="3" 
+            step="0.1"
+            value={layer.scale}
+            onChange={(e) => onUpdateLayer(layer.id, { scale: parseFloat(e.target.value) })}
+          />
+          <span className="value">{layer.scale.toFixed(1)}x</span>
+        </label>
+
+        <label>
+          <span>Rotation</span>
+          <input 
+            type="range" 
+            min="0" 
+            max="360" 
+            step="1"
+            value={layer.rotation}
+            onChange={(e) => onUpdateLayer(layer.id, { rotation: parseInt(e.target.value) })}
+          />
+          <span className="value">{layer.rotation}°</span>
+        </label>
+      </div>
+
+      <div className="property-section">
+        <h4>Fusion</h4>
+        <select 
+          value={layer.blendMode}
+          onChange={(e) => onUpdateLayer(layer.id, { blendMode: e.target.value })}
+        >
+          <option value="normal">Normal</option>
+          <option value="multiply">Multiply</option>
+          <option value="screen">Screen</option>
+          <option value="overlay">Overlay</option>
+          <option value="darken">Darken</option>
+          <option value="lighten">Lighten</option>
+          <option value="color-dodge">Color Dodge</option>
+          <option value="color-burn">Color Burn</option>
+          <option value="hard-light">Hard Light</option>
+          <option value="soft-light">Soft Light</option>
+        </select>
+      </div>
+
+      <div className="property-section">
+        <h4>Filtres</h4>
+        
+        <label>
+          <span>Blur</span>
+          <input 
+            type="range" 
+            min="0" 
+            max="20" 
+            step="0.5"
+            value={layer.filters.blur}
+            onChange={(e) => onUpdateLayer(layer.id, {
+              filters: { ...layer.filters, blur: parseFloat(e.target.value) }
+            })}
+          />
+          <span className="value">{layer.filters.blur.toFixed(1)}px</span>
+        </label>
+
+        <label>
+          <span>Luminosité</span>
+          <input 
+            type="range" 
+            min="0" 
+            max="200" 
+            step="1"
+            value={layer.filters.brightness}
+            onChange={(e) => onUpdateLayer(layer.id, {
+              filters: { ...layer.filters, brightness: parseInt(e.target.value) }
+            })}
+          />
+          <span className="value">{layer.filters.brightness}%</span>
+        </label>
+
+        <label>
+          <span>Contraste</span>
+          <input 
+            type="range" 
+            min="0" 
+            max="200" 
+            step="1"
+            value={layer.filters.contrast}
+            onChange={(e) => onUpdateLayer(layer.id, {
+              filters: { ...layer.filters, contrast: parseInt(e.target.value) }
+            })}
+          />
+          <span className="value">{layer.filters.contrast}%</span>
+        </label>
+      </div>
     </div>
   )
 }

@@ -130,6 +130,7 @@ function App() {
           audioData={audioData}
           audioAnalyzer={audioAnalyzerRef.current}
           onUpdateLayer={updateLayer}
+          selectedLayer={layers.find(l => l.id === selectedLayerId)}
         />
       </div>
     </div>
