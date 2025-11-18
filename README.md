@@ -140,6 +140,19 @@ Active le mode révolutionnaire de VJing tactile audio-réactif :
 - ▶️ Rejouez vos performances
 - 💾 Sauvegardez et partagez vos créations
 
+### 🎥 Loop Video Recorder (RÉVOLUTIONNAIRE !)
+Capturer des loops vidéo de 10 secondes avec effet **ping-pong automatique** :
+- **Countdown 3-2-1** avant capture
+- **Auto-loop parfait** : lecture normale + reverse
+- **Export multi-format** :
+  - 🎬 WebM (haute qualité)
+  - 🎥 MP4/H264 (compatible partout)
+  - 🖼️ GIF animé (optimisé, 15 FPS)
+- **Galerie visuelle** avec preview loop
+- Créez des loops hypnotiques en secondes !
+
+**C'est comme un Boomerang Instagram mais pour VJs ! 🌀✨**
+
 ### Prochaines Fonctionnalités
 - Effets de glitch audio-réactifs
 - Transitions automatiques intelligentes

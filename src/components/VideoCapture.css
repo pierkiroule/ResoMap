@@ -205,40 +205,58 @@
 }
 
 .card-actions {
-  display: flex;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
   padding: 0.5rem;
   background: rgba(15, 52, 96, 0.5);
 }
 
 .card-actions button {
-  flex: 1;
   padding: 0.5rem;
   border: none;
   border-radius: 6px;
-  font-size: 1.1rem;
+  font-size: 0.7rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
-.download-btn {
-  background: rgba(0, 255, 136, 0.2);
-  border: 1px solid rgba(0, 255, 136, 0.5);
+.export-btn {
+  background: rgba(102, 126, 234, 0.2);
+  border: 1px solid rgba(102, 126, 234, 0.5);
+  color: white;
 }
 
-.download-btn:hover {
-  background: rgba(0, 255, 136, 0.3);
-  transform: scale(1.05);
+.export-btn:hover {
+  background: rgba(102, 126, 234, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.export-btn.gif {
+  background: rgba(255, 193, 7, 0.2);
+  border: 1px solid rgba(255, 193, 7, 0.5);
+}
+
+.export-btn.gif:hover {
+  background: rgba(255, 193, 7, 0.3);
+  box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
 }
 
 .delete-btn {
+  grid-column: span 2;
   background: rgba(255, 82, 82, 0.2);
   border: 1px solid rgba(255, 82, 82, 0.5);
+  color: white;
+  font-size: 0.8rem;
 }
 
 .delete-btn:hover {
-  background: rgba(255, 82, 82, 0.3);
-  transform: scale(1.05);
+  background: rgba(255, 82, 82, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 82, 82, 0.3);
 }
 
 /* Scrollbar styling */

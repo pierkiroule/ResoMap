@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react'
+import GifEncoder from '../utils/GifEncoder'
 import './VideoCapture.css'
 
 function VideoCapture({ canvasRef }) {
@@ -193,13 +194,149 @@ function VideoCapture({ canvasRef }) {
     }
   }
 
-  const downloadRecording = (recording) => {
+  const downloadRecording = (recording, format = 'webm') => {
     const a = document.createElement('a')
     a.href = recording.url
-    a.download = `resomap-loop-${recording.id}.webm`
+    a.download = `resomap-loop-${recording.id}.${format}`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
+  }
+
+  const exportAsGif = async (recording) => {
+    setIsProcessing(true)
+    
+    try {
+      // Load the video
+      const video = document.createElement('video')
+      video.src = recording.url
+      video.muted = true
+      
+      await new Promise((resolve) => {
+        video.onloadedmetadata = resolve
+      })
+
+      // Create canvas for frame extraction
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.min(video.videoWidth, 480) // Limit width for GIF size
+      canvas.height = Math.min(video.videoHeight, 270)
+      const ctx = canvas.getContext('2d')
+
+      const fps = 15 // Reduced FPS for smaller GIF
+      const duration = video.duration
+      const totalFrames = Math.floor(duration * fps)
+
+      // Extract frames
+      const frames = []
+      for (let i = 0; i < totalFrames; i++) {
+        video.currentTime = (i / fps)
+        await new Promise(resolve => {
+          video.onseeked = resolve
+        })
+        
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        frames.push(canvas.toDataURL('image/webp', 0.6))
+      }
+
+      // Create GIF/Animated WebP
+      const encoder = new GifEncoder(canvas.width, canvas.height, fps)
+      frames.forEach(frame => encoder.addFrame(frame))
+      const gifBlob = await encoder.finish()
+      
+      // Download
+      const gifUrl = URL.createObjectURL(gifBlob)
+      const a = document.createElement('a')
+      a.href = gifUrl
+      a.download = `resomap-loop-${recording.id}.webm` // Animated WebP format
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      
+      setIsProcessing(false)
+    } catch (error) {
+      console.error('Erreur export GIF:', error)
+      alert('Erreur lors de l\'export GIF')
+      setIsProcessing(false)
+    }
+  }
+
+  const exportAsMp4 = async (recording) => {
+    setIsProcessing(true)
+    
+    try {
+      // Create a new recording with MP4 codec if supported
+      const video = document.createElement('video')
+      video.src = recording.url
+      video.muted = true
+      
+      await new Promise((resolve) => {
+        video.onloadedmetadata = resolve
+      })
+
+      video.play()
+
+      // Create canvas stream
+      const canvas = document.createElement('canvas')
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      const ctx = canvas.getContext('2d')
+
+      const stream = canvas.captureStream(30)
+      
+      // Try MP4 codec, fallback to WebM
+      let mimeType = 'video/mp4;codecs=avc1'
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'video/webm;codecs=h264'
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/webm;codecs=vp9'
+        }
+      }
+
+      const recorder = new MediaRecorder(stream, {
+        mimeType: mimeType,
+        videoBitsPerSecond: 8000000
+      })
+
+      const chunks = []
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data)
+      }
+
+      recorder.onstop = () => {
+        const mp4Blob = new Blob(chunks, { type: mimeType })
+        const mp4Url = URL.createObjectURL(mp4Blob)
+        
+        const a = document.createElement('a')
+        a.href = mp4Url
+        const extension = mimeType.includes('mp4') ? 'mp4' : 'webm'
+        a.download = `resomap-loop-${recording.id}.${extension}`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        
+        setIsProcessing(false)
+      }
+
+      recorder.start()
+
+      // Render video to canvas
+      const renderLoop = () => {
+        if (!video.paused && !video.ended) {
+          ctx.drawImage(video, 0, 0)
+          requestAnimationFrame(renderLoop)
+        } else {
+          recorder.stop()
+        }
+      }
+      
+      renderLoop()
+
+    } catch (error) {
+      console.error('Erreur export MP4:', error)
+      alert('Erreur lors de l\'export MP4. Utilisant le format WebM.')
+      downloadRecording(recording, 'webm')
+      setIsProcessing(false)
+    }
   }
 
   const deleteRecording = (id) => {
@@ -262,11 +399,25 @@ function VideoCapture({ canvasRef }) {
                 </div>
                 <div className="card-actions">
                   <button 
-                    className="download-btn"
-                    onClick={() => downloadRecording(rec)}
-                    title="Télécharger"
+                    className="export-btn"
+                    onClick={() => downloadRecording(rec, 'webm')}
+                    title="Télécharger WebM"
                   >
-                    ⬇️
+                    🎬 WebM
+                  </button>
+                  <button 
+                    className="export-btn"
+                    onClick={() => exportAsMp4(rec)}
+                    title="Export MP4/H264"
+                  >
+                    🎥 MP4
+                  </button>
+                  <button 
+                    className="export-btn gif"
+                    onClick={() => exportAsGif(rec)}
+                    title="Export GIF animé"
+                  >
+                    🖼️ GIF
                   </button>
                   <button 
                     className="delete-btn"
