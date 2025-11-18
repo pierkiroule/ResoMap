@@ -1,14 +1,20 @@
 import React, { useState } from 'react'
 import './TabsInspector.css'
 
-function TabsInspector({ layer, onUpdateLayer }) {
+function TabsInspector({ layer, onUpdateLayer, showDreamMixer, onToggleDreamMixer }) {
   const [activeTab, setActiveTab] = useState('transform')
 
-  if (!layer) {
+  if (!layer && !showDreamMixer) {
     return (
       <div className="tabs-inspector empty">
         <p className="empty-message">Sélectionnez un calque</p>
         <p className="empty-hint">Cliquez sur un clip à gauche</p>
+        <button 
+          className="dream-mixer-toggle"
+          onClick={onToggleDreamMixer}
+        >
+          🌙 Dream Mixer
+        </button>
       </div>
     )
   }

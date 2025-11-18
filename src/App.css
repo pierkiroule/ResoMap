@@ -75,6 +75,21 @@
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
+.header-btn.active {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.6) 0%, rgba(118, 75, 162, 0.6) 100%);
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+  animation: pulse-active 2s ease-in-out infinite;
+}
+
+@keyframes pulse-active {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(102, 126, 234, 0.8);
+  }
+}
+
 /* Mobile adaptations */
 @media (max-width: 1024px) {
   .app-header-pro {

@@ -3,6 +3,7 @@ import ProLayout from './components/ProLayout'
 import ClipBrowser from './components/ClipBrowser'
 import TabsInspector from './components/TabsInspector'
 import Viewer from './components/Viewer'
+import DreamMixer from './components/DreamMixer'
 import ShortcutsHelp from './components/ShortcutsHelp'
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts'
 import AudioAnalyzer from './utils/AudioAnalyzer'
@@ -14,6 +15,7 @@ function App() {
   const [audioData, setAudioData] = useState({ bass: 0, mid: 0, high: 0, overall: 0 })
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [showDreamMixer, setShowDreamMixer] = useState(false)
   const audioAnalyzerRef = useRef(null)
   const animationFrameRef = useRef(null)
   const fileInputRef = useRef(null)
@@ -216,6 +218,13 @@ function App() {
           <button className="header-btn" onClick={handleFileImport}>
             + Import Media
           </button>
+          <button 
+            className={`header-btn ${showDreamMixer ? 'active' : ''}`}
+            onClick={() => setShowDreamMixer(!showDreamMixer)}
+            title="Dream Mixer Mode"
+          >
+            🌙 Dream Mixer
+          </button>
         </div>
         <div className="header-right">
           <button className="header-btn" onClick={() => setShowShortcutsHelp(true)} title="Keyboard Shortcuts (?)">
@@ -224,32 +233,41 @@ function App() {
         </div>
       </header>
 
-      <ProLayout
-        clipBrowser={
-          <ClipBrowser
-            layers={layers}
-            selectedLayer={selectedLayer}
-            onSelectLayer={(layer) => setSelectedLayerId(layer.id)}
-            onDeleteLayer={deleteLayer}
-          />
-        }
-        viewer={
-          <Viewer
-            layers={layers}
-            audioData={audioData}
-            audioAnalyzer={audioAnalyzerRef.current}
-            onUpdateLayer={updateLayer}
-            selectedLayer={selectedLayer}
-          />
-        }
-        inspector={
-          <TabsInspector
-            layer={selectedLayer}
-            onUpdateLayer={updateLayer}
-          />
-        }
-        onToggleFullscreen={(fullscreen) => setIsFullscreen(fullscreen)}
-      />
+      {showDreamMixer ? (
+        <DreamMixer 
+          audioAnalyzer={audioAnalyzerRef.current}
+          audioData={audioData}
+        />
+      ) : (
+        <ProLayout
+          clipBrowser={
+            <ClipBrowser
+              layers={layers}
+              selectedLayer={selectedLayer}
+              onSelectLayer={(layer) => setSelectedLayerId(layer.id)}
+              onDeleteLayer={deleteLayer}
+            />
+          }
+          viewer={
+            <Viewer
+              layers={layers}
+              audioData={audioData}
+              audioAnalyzer={audioAnalyzerRef.current}
+              onUpdateLayer={updateLayer}
+              selectedLayer={selectedLayer}
+            />
+          }
+          inspector={
+            <TabsInspector
+              layer={selectedLayer}
+              onUpdateLayer={updateLayer}
+              showDreamMixer={showDreamMixer}
+              onToggleDreamMixer={() => setShowDreamMixer(true)}
+            />
+          }
+          onToggleFullscreen={(fullscreen) => setIsFullscreen(fullscreen)}
+        />
+      )}
 
       {showShortcutsHelp && (
         <ShortcutsHelp onClose={() => setShowShortcutsHelp(false)} />
