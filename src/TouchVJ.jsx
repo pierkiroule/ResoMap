@@ -719,197 +719,197 @@ export default function TouchVJ() {
         </div>
       )}
       
-      {/* XY Pad Controller */}
-      {xyPadActive && (
-        <div className={`xy-pad-container ${uiVisible ? 'visible' : 'hidden'}`}>
-          <div className="xy-pad-header">
-            <select 
-              value={xyPadFX.xEffect}
-              onChange={(e) => setXyPadFX(prev => ({ ...prev, xEffect: e.target.value }))}
-            >
-              <option value="hue">Hue</option>
-              <option value="blur">Blur</option>
-              <option value="brightness">Brightness</option>
-              <option value="contrast">Contrast</option>
-              <option value="saturate">Saturate</option>
-            </select>
-            <span>X</span>
-            <span>Y</span>
-            <select 
-              value={xyPadFX.yEffect}
-              onChange={(e) => setXyPadFX(prev => ({ ...prev, yEffect: e.target.value }))}
-            >
-              <option value="blur">Blur</option>
-              <option value="hue">Hue</option>
-              <option value="brightness">Brightness</option>
-              <option value="contrast">Contrast</option>
-              <option value="saturate">Saturate</option>
-            </select>
-          </div>
-          <div 
-            className="xy-pad"
-            onMouseDown={handleXYPad}
-            onMouseMove={(e) => e.buttons === 1 && handleXYPad(e)}
-            onTouchStart={handleXYPad}
-            onTouchMove={handleXYPad}
-          >
+        {/* XY Pad Controller */}
+        {xyPadActive && (
+          <div className={`xy-pad-container ${uiVisible ? 'visible' : 'hidden'}`}>
+            <div className="xy-pad-header">
+              <select 
+                value={xyPadFX.xEffect}
+                onChange={(e) => setXyPadFX(prev => ({ ...prev, xEffect: e.target.value }))}
+              >
+                <option value="hue">Hue</option>
+                <option value="blur">Blur</option>
+                <option value="brightness">Brightness</option>
+                <option value="contrast">Contrast</option>
+                <option value="saturate">Saturate</option>
+              </select>
+              <span>X</span>
+              <span>Y</span>
+              <select 
+                value={xyPadFX.yEffect}
+                onChange={(e) => setXyPadFX(prev => ({ ...prev, yEffect: e.target.value }))}
+              >
+                <option value="blur">Blur</option>
+                <option value="hue">Hue</option>
+                <option value="brightness">Brightness</option>
+                <option value="contrast">Contrast</option>
+                <option value="saturate">Saturate</option>
+              </select>
+            </div>
             <div 
-              className="xy-pad-cursor"
-              style={{
-                left: `${xyPadFX.x * 100}%`,
-                top: `${(1 - xyPadFX.y) * 100}%`
-              }}
-            />
+              className="xy-pad"
+              onMouseDown={handleXYPad}
+              onMouseMove={(e) => e.buttons === 1 && handleXYPad(e)}
+              onTouchStart={handleXYPad}
+              onTouchMove={handleXYPad}
+            >
+              <div 
+                className="xy-pad-cursor"
+                style={{
+                  left: `${xyPadFX.x * 100}%`,
+                  top: `${(1 - xyPadFX.y) * 100}%`
+                }}
+              />
+            </div>
           </div>
-        </div>
-      )}
-      
-      {/* Layer Controls */}
-      {selectedLayer && manipulateMode && (
-        <div className={`layer-controls ${uiVisible ? 'visible' : 'hidden'}`}>
-          <button onClick={() => {
-            const layer = videoLayers.find(l => l.id === selectedLayer)
-            updateLayer(selectedLayer, { 
-              scale: Math.max(0.5, layer.scale - 0.1) 
-            })
-          }}>-</button>
-          <span>Scale</span>
-          <button onClick={() => {
-            const layer = videoLayers.find(l => l.id === selectedLayer)
-            updateLayer(selectedLayer, { 
-              scale: Math.min(3, layer.scale + 0.1) 
-            })
-          }}>+</button>
-          
-          <select 
-            value={videoLayers.find(l => l.id === selectedLayer)?.blendMode || 'screen'}
-            onChange={(e) => updateLayer(selectedLayer, { blendMode: e.target.value })}
-          >
-            <option value="normal">Normal</option>
-            <option value="screen">Screen</option>
-            <option value="overlay">Overlay</option>
-            <option value="multiply">Multiply</option>
-            <option value="color-dodge">Color Dodge</option>
-            <option value="color-burn">Color Burn</option>
-            <option value="hard-light">Hard Light</option>
-            <option value="soft-light">Soft Light</option>
-            <option value="difference">Difference</option>
-            <option value="exclusion">Exclusion</option>
-            <option value="hue">Hue</option>
-            <option value="saturation">Saturation</option>
-            <option value="luminosity">Luminosity</option>
-          </select>
-          
-          <button 
-            className="delete"
-            onClick={() => deleteLayer(selectedLayer)}
-          >
-            🗑️
-          </button>
-        </div>
-      )}
-      
-        {/* Dreamflow Timeline */}
-        <div className={`dreamflow-panel ${uiVisible ? 'visible' : 'hidden'}`}>
-          <div className="timeline-header">
-            <button onClick={toggleTimelinePlayback}>
-              {timelinePlaying ? '⏸️' : '▶️'}
-            </button>
-            <button onClick={resetTimelineTime}>⏮️</button>
-            <span className="timeline-time">
-              {formatSeconds(timelineTime)}s / {safeTimelineLength}s
-            </span>
-            <input
-              type="range"
-              min="0"
-              max={safeTimelineLength}
-              step="0.1"
-              value={timelineTime}
-              onChange={(e) => handleTimelineSeek(e.target.value)}
-            />
-            <label>
-              Durée
-              <select value={timelineLength} onChange={(e) => setTimelineLength(Number(e.target.value))}>
-                {[30, 45, 60, 90, 120].map(len => (
-                  <option key={len} value={len}>{len}s</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Clip
-              <select value={clipDuration} onChange={(e) => setClipDuration(Number(e.target.value))}>
-                {[2, 4, 6, 8, 12].map(len => (
-                  <option key={len} value={len}>{len}s</option>
-                ))}
-              </select>
-            </label>
+        )}
+
+        {/* Docked Panels */}
+        <div className={`panel-dock ${uiVisible ? 'visible' : 'hidden'}`}>
+          <div className="audio-viz">
+            <div className="bar" style={{ width: `${audioData.bass * 100}%` }}>🔊</div>
+            <div className="bar" style={{ width: `${audioData.mid * 100}%` }}>🎸</div>
+            <div className="bar" style={{ width: `${audioData.high * 100}%` }}>🎹</div>
           </div>
-          
-          <div className="timeline-layers">
-            {videoLayers.length === 0 ? (
-              <div className="timeline-empty">Ajoutez un calque pour séquencer vos blends.</div>
-            ) : (
-              videoLayers.map(layer => {
-                const layerClips = timelineClips.filter(clip => clip.layerId === layer.id)
-                return (
-                  <div key={layer.id} className="timeline-row">
-                    <span className="timeline-layer-name">{layer.name}</span>
-                    <div className="timeline-track">
-                      {layerClips.map(clip => {
-                        const startPercent = (clip.start / safeTimelineLength) * 100
-                        const widthPercent = ((clip.end - clip.start) / safeTimelineLength) * 100
-                        return (
-                          <div
-                            key={clip.id}
-                            className={`timeline-clip ${clip.animatorFx ? 'fx' : ''}`}
-                            style={{ left: `${startPercent}%`, width: `${widthPercent}%` }}
-                            title={`${clip.blendMode}${clip.animatorFx ? ` · ${clip.animatorFx}` : ''} (${formatSeconds(clip.start)}s → ${formatSeconds(clip.end)}s)`}
-                            onDoubleClick={() => removeTimelineClip(clip.id)}
-                          >
-                            <span>{clip.animatorFx || clip.blendMode}</span>
-                          </div>
-                        )
-                      })}
-                      <div
-                        className="timeline-cursor"
-                        style={{ left: `${(timelineTime / safeTimelineLength) * 100}%` }}
-                      />
+
+          <div className="dreamflow-panel">
+            <div className="timeline-header">
+              <button onClick={toggleTimelinePlayback}>
+                {timelinePlaying ? '⏸️' : '▶️'}
+              </button>
+              <button onClick={resetTimelineTime}>⏮️</button>
+              <span className="timeline-time">
+                {formatSeconds(timelineTime)}s / {safeTimelineLength}s
+              </span>
+              <input
+                type="range"
+                min="0"
+                max={safeTimelineLength}
+                step="0.1"
+                value={timelineTime}
+                onChange={(e) => handleTimelineSeek(e.target.value)}
+              />
+              <label>
+                Durée
+                <select value={timelineLength} onChange={(e) => setTimelineLength(Number(e.target.value))}>
+                  {[30, 45, 60, 90, 120].map(len => (
+                    <option key={len} value={len}>{len}s</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Clip
+                <select value={clipDuration} onChange={(e) => setClipDuration(Number(e.target.value))}>
+                  {[2, 4, 6, 8, 12].map(len => (
+                    <option key={len} value={len}>{len}s</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            
+            <div className="timeline-layers">
+              {videoLayers.length === 0 ? (
+                <div className="timeline-empty">Ajoutez un calque pour séquencer vos blends.</div>
+              ) : (
+                videoLayers.map(layer => {
+                  const layerClips = timelineClips.filter(clip => clip.layerId === layer.id)
+                  return (
+                    <div key={layer.id} className="timeline-row">
+                      <span className="timeline-layer-name">{layer.name}</span>
+                      <div className="timeline-track">
+                        {layerClips.map(clip => {
+                          const startPercent = (clip.start / safeTimelineLength) * 100
+                          const widthPercent = ((clip.end - clip.start) / safeTimelineLength) * 100
+                          return (
+                            <div
+                              key={clip.id}
+                              className={`timeline-clip ${clip.animatorFx ? 'fx' : ''}`}
+                              style={{ left: `${startPercent}%`, width: `${widthPercent}%` }}
+                              title={`${clip.blendMode}${clip.animatorFx ? ` · ${clip.animatorFx}` : ''} (${formatSeconds(clip.start)}s → ${formatSeconds(clip.end)}s)`}
+                              onDoubleClick={() => removeTimelineClip(clip.id)}
+                            >
+                              <span>{clip.animatorFx || clip.blendMode}</span>
+                            </div>
+                          )
+                        })}
+                        <div
+                          className="timeline-cursor"
+                          style={{ left: `${(timelineTime / safeTimelineLength) * 100}%` }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                )
-              })
+                  )
+                })
+              )}
+            </div>
+            
+            {selectedLayer && (
+              <div className="timeline-actions">
+                <div className="clip-tools">
+                  <span>Blend Modes</span>
+                  {['screen', 'overlay', 'multiply', 'difference', 'soft-light'].map(mode => (
+                    <button key={mode} onClick={() => addTimelineClip(mode)}>
+                      {mode}
+                    </button>
+                  ))}
+                </div>
+                <div className="clip-tools">
+                  <span>Dream Macros</span>
+                  {Object.keys(ANIMATOR_FX_PRESETS).map(name => (
+                    <button key={name} onClick={() => addTimelineClip('screen', name)}>
+                      {name}
+                    </button>
+                  ))}
+                </div>
+                <small>💡 Double-cliquez sur un clip pour le supprimer.</small>
+              </div>
             )}
           </div>
-          
-          {selectedLayer && (
-            <div className="timeline-actions">
-              <div className="clip-tools">
-                <span>Blend Modes</span>
-                {['screen', 'overlay', 'multiply', 'difference', 'soft-light'].map(mode => (
-                  <button key={mode} onClick={() => addTimelineClip(mode)}>
-                    {mode}
-                  </button>
-                ))}
-              </div>
-              <div className="clip-tools">
-                <span>Dream Macros</span>
-                {Object.keys(ANIMATOR_FX_PRESETS).map(name => (
-                  <button key={name} onClick={() => addTimelineClip('screen', name)}>
-                    {name}
-                  </button>
-                ))}
-              </div>
-              <small>💡 Double-cliquez sur un clip pour le supprimer.</small>
+
+          {selectedLayer && manipulateMode && (
+            <div className="layer-controls">
+              <button onClick={() => {
+                const layer = videoLayers.find(l => l.id === selectedLayer)
+                updateLayer(selectedLayer, { 
+                  scale: Math.max(0.5, layer.scale - 0.1) 
+                })
+              }}>-</button>
+              <span>Scale</span>
+              <button onClick={() => {
+                const layer = videoLayers.find(l => l.id === selectedLayer)
+                updateLayer(selectedLayer, { 
+                  scale: Math.min(3, layer.scale + 0.1) 
+                })
+              }}>+</button>
+              
+              <select 
+                value={videoLayers.find(l => l.id === selectedLayer)?.blendMode || 'screen'}
+                onChange={(e) => updateLayer(selectedLayer, { blendMode: e.target.value })}
+              >
+                <option value="normal">Normal</option>
+                <option value="screen">Screen</option>
+                <option value="overlay">Overlay</option>
+                <option value="multiply">Multiply</option>
+                <option value="color-dodge">Color Dodge</option>
+                <option value="color-burn">Color Burn</option>
+                <option value="hard-light">Hard Light</option>
+                <option value="soft-light">Soft Light</option>
+                <option value="difference">Difference</option>
+                <option value="exclusion">Exclusion</option>
+                <option value="hue">Hue</option>
+                <option value="saturation">Saturation</option>
+                <option value="luminosity">Luminosity</option>
+              </select>
+              
+              <button 
+                className="delete"
+                onClick={() => deleteLayer(selectedLayer)}
+              >
+                🗑️
+              </button>
             </div>
           )}
         </div>
-        
-      {/* Audio Viz */}
-      <div className={`audio-viz ${uiVisible ? 'visible' : 'hidden'}`}>
-        <div className="bar" style={{ width: `${audioData.bass * 100}%` }}>🔊</div>
-        <div className="bar" style={{ width: `${audioData.mid * 100}%` }}>🎸</div>
-        <div className="bar" style={{ width: `${audioData.high * 100}%` }}>🎹</div>
-      </div>
     </div>
   )
 }
