@@ -114,7 +114,7 @@ function Layer({ layer }) {
             <>
               <img
                 ref={mediaRef}
-                src={layer.url}
+                src={layer.src}
                 alt={layer.name}
                 style={{ display: 'none' }}
               />
@@ -127,7 +127,7 @@ function Layer({ layer }) {
         }
         return (
           <img
-            src={layer.url}
+            src={layer.src}
             alt={layer.name}
             style={{ maxWidth: '100%', maxHeight: '100%' }}
           />
@@ -139,7 +139,7 @@ function Layer({ layer }) {
             <>
               <video
                 ref={mediaRef}
-                src={layer.url}
+                src={layer.src}
                 data-layer-id={layer.id}
                 autoPlay
                 loop
@@ -155,7 +155,7 @@ function Layer({ layer }) {
         }
         return (
           <video
-            src={layer.url}
+            src={layer.src}
             data-layer-id={layer.id}
             autoPlay
             loop
@@ -167,7 +167,7 @@ function Layer({ layer }) {
       case 'audio':
         return (
           <div className="audio-visualizer">
-            <audio src={layer.url} data-layer-id={layer.id} autoPlay loop />
+            <audio src={layer.src} data-layer-id={layer.id} autoPlay loop />
             <div className="audio-icon">🎵</div>
             <div className="audio-name">{layer.name}</div>
           </div>
