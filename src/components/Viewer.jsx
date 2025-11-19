@@ -3,12 +3,14 @@ import Layer from './Layer'
 import TouchInteraction from './TouchInteraction'
 import VideoCapture from './VideoCapture'
 import SmartFloatingPanel from './SmartFloatingPanel'
+import TouchVJPad from './TouchVJPad'
 import './Viewer.css'
 
 function Viewer({ layers, audioData, audioAnalyzer, onUpdateLayer, selectedLayer }) {
   const viewerRef = useRef(null)
   const [backdrop, setBackdrop] = useState('black')
   const [isPerformanceMode, setIsPerformanceMode] = useState(false)
+  const [isTouchVJMode, setIsTouchVJMode] = useState(false)
   const [showVideoCapture, setShowVideoCapture] = useState(false)
   const [showLayerProps, setShowLayerProps] = useState(false)
 
@@ -35,11 +37,49 @@ function Viewer({ layers, audioData, audioAnalyzer, onUpdateLayer, selectedLayer
     }
   }
 
+  // If Touch VJ Mode, show simplified view
+  if (isTouchVJMode) {
+    return (
+      <div className="viewer touch-vj-viewer" ref={viewerRef}>
+        <div className="viewer-header compact">
+          <button 
+            className="exit-touch-vj"
+            onClick={() => setIsTouchVJMode(false)}
+            title="Quitter Touch VJ Mode"
+          >
+            ← Retour
+          </button>
+          <h2>👆 Touch VJ</h2>
+        </div>
+        
+        <div className="canvas" style={getCanvasStyle()}>
+          {layers.map((layer) => (
+            layer.visible && <Layer key={layer.id} layer={layer} audioData={audioData} />
+          ))}
+          
+          <TouchVJPad 
+            layers={layers}
+            audioData={audioData}
+            onUpdateLayer={onUpdateLayer}
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="viewer" ref={viewerRef}>
       <div className="viewer-header">
         <h2>{isPerformanceMode ? '🎭 Mode Performance VJ' : '🎨 Aperçu du Rêve'}</h2>
         <div className="viewer-controls">
+          <button 
+            className={`performance-toggle ${isTouchVJMode ? 'active' : ''}`}
+            onClick={() => setIsTouchVJMode(!isTouchVJMode)}
+            title="Touch VJ Mode - Contrôle tactile temps réel"
+          >
+            {isTouchVJMode ? '👆 Touch VJ ON' : '👆 Touch VJ'}
+          </button>
+          
           <button 
             className={`performance-toggle ${isPerformanceMode ? 'active' : ''}`}
             onClick={() => setIsPerformanceMode(!isPerformanceMode)}
