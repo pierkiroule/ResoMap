@@ -114,12 +114,10 @@ export default function TouchVJ() {
         x: window.innerWidth / 2,
         y: window.innerHeight / 2,
         scale: 1,
-        rotation: 0,
         opacity: 1,
         blendMode: 'screen',
         audioReactive: {
           scale: true,
-          rotation: true,
           opacity: false
         }
       }
@@ -317,7 +315,6 @@ export default function TouchVJ() {
       <div className="video-layers">
         {videoLayers.map(layer => {
           const audioScale = layer.audioReactive.scale ? (1 + audioData.bass * 0.5) : 1
-          const audioRotation = layer.audioReactive.rotation ? (audioData.mid * 360) : 0
           const audioOpacity = layer.audioReactive.opacity ? audioData.high : layer.opacity
           
           return (
@@ -332,7 +329,7 @@ export default function TouchVJ() {
               style={{
                 left: layer.x + 'px',
                 top: layer.y + 'px',
-                transform: `translate(-50%, -50%) scale(${layer.scale * audioScale}) rotate(${layer.rotation + audioRotation}deg)`,
+                transform: `translate(-50%, -50%) scale(${layer.scale * audioScale})`,
                 opacity: audioOpacity,
                 mixBlendMode: layer.blendMode
               }}
@@ -436,20 +433,6 @@ export default function TouchVJ() {
               scale: Math.min(3, layer.scale + 0.1) 
             })
           }}>+</button>
-          
-          <button onClick={() => {
-            const layer = videoLayers.find(l => l.id === selectedLayer)
-            updateLayer(selectedLayer, { 
-              rotation: layer.rotation - 15
-            })
-          }}>↺</button>
-          <span>Rotate</span>
-          <button onClick={() => {
-            const layer = videoLayers.find(l => l.id === selectedLayer)
-            updateLayer(selectedLayer, { 
-              rotation: layer.rotation + 15
-            })
-          }}>↻</button>
           
           <select 
             value={videoLayers.find(l => l.id === selectedLayer)?.blendMode || 'screen'}
