@@ -48,6 +48,7 @@ export default function TouchVJ() {
   const [timelineLength, setTimelineLength] = useState(30)
   const [timelinePlaying, setTimelinePlaying] = useState(false)
   const [clipDuration, setClipDuration] = useState(5)
+  const [timelineVisible, setTimelineVisible] = useState(false)
   const timelinePlayingRef = useRef(false)
   const timelineLengthRef = useRef(30)
   const lastTimelineTickRef = useRef(null)
@@ -67,6 +68,8 @@ export default function TouchVJ() {
   // Recording
   const mediaRecorderRef = useRef(null)
   const recordedChunksRef = useRef([])
+  const recordingStreamRef = useRef(null)
+  const autoStopTimeoutRef = useRef(null)
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
   const recordingTimerRef = useRef(null)
