@@ -381,6 +381,46 @@ body {
     font-size: 0.7rem;
   }
   
+  .recording-timer {
+    top: auto;
+    bottom: 220px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+  
+  .xy-pad-container {
+    right: 10px;
+    left: auto;
+    top: auto;
+    bottom: 180px;
+    transform: none;
+  }
+  
+  .xy-pad-container.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  
+  .xy-pad-container.hidden {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  
+  .xy-pad {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .xy-pad-header {
+    padding: 6px 8px;
+    gap: 4px;
+  }
+  
+  .xy-pad-header select {
+    padding: 3px 6px;
+    font-size: 0.75rem;
+  }
+  
   .layer-controls {
     bottom: 180px;
     flex-wrap: wrap;
