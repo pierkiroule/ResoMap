@@ -345,31 +345,50 @@ export function calculateEffects(mode, shapeData, audioData) {
 
   // === PSYCHEDELIC MODE ===
   if (mode === 'psychedelic') {
-    effects.hueRotate = (avgX * 360 + Date.now() / 10) % 360
-    effects.scale = 1 + Math.sin(Date.now() / 500) * 0.3 + (audioData.bass || 0) * 0.8
-    effects.brightness = 100 + normalizedVelocity * 50 + (audioData.high || 0) * 50
-    effects.saturate = 200 + (audioData.high || 0) * 100
-    effects.blur = 2 + Math.sin(Date.now() / 300) * 3
+    const time = Date.now() / 1000
+    effects.hueRotate = (avgX * 720 + time * 50) % 360
+    effects.scale = 1 + Math.sin(time * 2) * 0.2 + (audioData.bass || 0) * 1.2
+    effects.brightness = 110 + normalizedVelocity * 40 + (audioData.overall || 0) * 60
+    effects.saturate = 180 + (audioData.mid || 0) * 120
+    effects.blur = 1 + Math.sin(time * 3) * 2 + (audioData.high || 0) * 5
+    effects.contrast = 110 + (audioData.bass || 0) * 30
     
     if (shape === 'circle') {
-      effects.rotation = (Date.now() / 20) % 360
+      effects.rotation = (time * 30 + avgX * 180) % 360
+      effects.scale *= 1.1 + (audioData.bass || 0) * 0.4
     } else if (shape === 'spiral') {
-      effects.rotation = (Date.now() / 10) % 360
-      effects.scale *= 1.3
+      effects.rotation = (time * 60) % 360
+      effects.scale *= 1.2 + (audioData.bass || 0) * 0.6
+      effects.hueRotate = (effects.hueRotate + time * 100) % 360
+    } else if (shape === 'zigzag') {
+      effects.hueRotate = (time * 200) % 360
+      effects.scale *= 1 + Math.sin(time * 10) * 0.3
     }
   }
 
   // === GLITCH MODE ===
   else if (mode === 'glitch') {
-    const glitchAmount = normalizedVelocity * (audioData.bass || 0)
-    effects.translateX = (Math.random() - 0.5) * glitchAmount * 50
-    effects.translateY = (Math.random() - 0.5) * glitchAmount * 50
-    effects.contrast = 130 + (audioData.mid || 0) * 50
-    effects.saturate = 120 + (audioData.high || 0) * 80
+    const time = Date.now() / 1000
+    const glitchIntensity = (audioData.bass || 0) * 2 + normalizedVelocity
+    const shouldGlitch = Math.random() < glitchIntensity * 0.5
+    
+    if (shouldGlitch) {
+      effects.translateX = (Math.random() - 0.5) * glitchIntensity * 80
+      effects.translateY = (Math.random() - 0.5) * glitchIntensity * 80
+    }
+    
+    effects.contrast = 140 + (audioData.mid || 0) * 70 + Math.sin(time * 20) * 30
+    effects.saturate = 100 + (audioData.high || 0) * 100
+    effects.brightness = 100 + Math.sin(time * 15) * 20
     
     if (shape === 'zigzag') {
-      effects.hueRotate = Math.random() * 360
-      if (Math.random() > 0.7) effects.invert = 100
+      effects.hueRotate = (time * 300) % 360
+      if ((audioData.bass || 0) > 0.7) effects.invert = 100
+    } else if (shape === 'line') {
+      effects.translateX += Math.sin(time * 10) * 20
+    } else if (shape === 'spiral') {
+      effects.rotation = (time * 90) % 360
+      if (Math.random() > 0.8) effects.invert = 100
     }
   }
 
@@ -396,19 +415,26 @@ export function calculateEffects(mode, shapeData, audioData) {
 
   // === VORTEX MODE ===
   else if (mode === 'vortex') {
-    const vortexIntensity = normalizedVelocity + (audioData.bass || 0)
-    effects.rotation = (Date.now() / 30) % 360
-    effects.scale = 1 + Math.sin(Date.now() / 400) * 0.4 * vortexIntensity
-    effects.blur = 3 + (audioData.mid || 0) * 8
+    const time = Date.now() / 1000
+    const vortexIntensity = normalizedVelocity * 2 + (audioData.bass || 0) * 1.5
+    
+    effects.rotation = (time * 45 + avgX * 360) % 360
+    effects.scale = 1 + Math.sin(time * 3) * 0.3 * vortexIntensity
+    effects.blur = 2 + (audioData.mid || 0) * 12
+    effects.hueRotate = (avgY * 180 + time * 30) % 360
+    effects.brightness = 105 + Math.sin(time * 4) * 15
     
     if (shape === 'spiral') {
-      effects.rotation *= 2
-      effects.scale *= 1.4
+      effects.rotation = (time * 120) % 360
+      effects.scale *= 1.5 + (audioData.bass || 0) * 0.5
+      effects.blur += 5
+    } else if (shape === 'circle') {
+      effects.rotation *= 1.5
     }
     
-    // Effet de distorsion radiale (simulé avec scale oscillant)
-    effects.scaleX = effects.scale * (1 + Math.sin(Date.now() / 200) * 0.2)
-    effects.scaleY = effects.scale * (1 - Math.sin(Date.now() / 200) * 0.2)
+    // Distorsion radiale
+    effects.scaleX = effects.scale * (1 + Math.sin(time * 5) * 0.3)
+    effects.scaleY = effects.scale * (1 - Math.sin(time * 5) * 0.3)
   }
 
   // === PAINTING MODE ===

@@ -1,59 +1,72 @@
 import React, { useRef, useEffect } from 'react'
 
 /**
- * PingPongVideo - Vidéo en mode ping-pong infini
+ * PingPongVideo - Vidéo en mode ping-pong VRAIMENT infini
  * 
  * Joue la vidéo en avant, puis en arrière, puis en avant, etc.
- * Loop infini automatique.
+ * Loop infini automatique sans coupure.
  */
 function PingPongVideo({ src, style, className, layerId }) {
   const videoRef = useRef(null)
   const directionRef = useRef(1) // 1 = forward, -1 = reverse
+  const lastTimeRef = useRef(0)
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
     let animationFrameId = null
-    let lastTime = 0
 
-    const pingPong = () => {
-      if (!video.paused && !video.ended) {
-        const currentTime = video.currentTime
-        const duration = video.duration
+    const pingPong = (currentTime) => {
+      const video = videoRef.current
+      if (!video) return
 
-        // Si on atteint la fin en mode forward
-        if (directionRef.current === 1 && currentTime >= duration) {
-          directionRef.current = -1 // Switch to reverse
-          video.currentTime = duration - 0.05 // Petit recul
-        }
-        
-        // Si on atteint le début en mode reverse
-        if (directionRef.current === -1 && currentTime <= 0) {
-          directionRef.current = 1 // Switch to forward
-          video.currentTime = 0.05 // Petit avancement
+      const duration = video.duration
+      const delta = (currentTime - lastTimeRef.current) / 1000 // en secondes
+
+      if (duration && !isNaN(duration)) {
+        let newTime = video.currentTime
+
+        // Update time selon direction
+        if (directionRef.current === 1) {
+          // Forward
+          newTime += delta
+          if (newTime >= duration) {
+            directionRef.current = -1
+            newTime = duration - 0.01
+          }
+        } else {
+          // Reverse
+          newTime -= delta
+          if (newTime <= 0) {
+            directionRef.current = 1
+            newTime = 0.01
+          }
         }
 
-        // Mise à jour du temps selon la direction
-        if (directionRef.current === -1) {
-          // Mode reverse : reculer manuellement
-          const delta = (performance.now() - lastTime) / 1000
-          video.currentTime = Math.max(0, currentTime - delta * video.playbackRate)
-        }
+        video.currentTime = newTime
       }
 
-      lastTime = performance.now()
+      lastTimeRef.current = currentTime
       animationFrameId = requestAnimationFrame(pingPong)
     }
 
-    // Start video
-    video.play().catch(err => console.log('Video play error:', err))
-    
-    // Start ping-pong loop
-    lastTime = performance.now()
-    pingPong()
+    // Wait for video to load
+    const handleLoadedMetadata = () => {
+      video.play().catch(err => console.log('Video play error:', err))
+      lastTimeRef.current = performance.now()
+      animationFrameId = requestAnimationFrame(pingPong)
+    }
+
+    video.addEventListener('loadedmetadata', handleLoadedMetadata)
+
+    // Si déjà loadée
+    if (video.readyState >= 2) {
+      handleLoadedMetadata()
+    }
 
     return () => {
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId)
       }
@@ -67,6 +80,7 @@ function PingPongVideo({ src, style, className, layerId }) {
       data-layer-id={layerId}
       muted
       playsInline
+      preload="auto"
       className={className}
       style={style}
     />

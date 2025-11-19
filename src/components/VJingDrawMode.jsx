@@ -140,7 +140,7 @@ function VJingDrawMode({
 
       {/* Hint - appears briefly */}
       <div className="vjing-hint">
-        👆 Dessine sur l'écran
+        👆 Touche l'écran pour créer
       </div>
     </div>
   )

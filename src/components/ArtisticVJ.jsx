@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import DrawingCanvas from './DrawingCanvas'
 import ModeSelector from './ModeSelector'
+import AudioSourceSelector from './AudioSourceSelector'
 import PingPongVideo from './PingPongVideo'
 import VJingDrawMode from './VJingDrawMode'
 import { calculateEffects, applyEffectsToLayer } from '../utils/effectModes'
@@ -9,13 +10,15 @@ import './ArtisticVJ.css'
 /**
  * ArtisticVJ - Composant principal pour le VJ tactile artistique
  * 
- * Deux modes :
+ * Trois modes :
  * 1. MODE SELECTION : Gérer les calques, choisir le mode
- * 2. MODE VJING DRAW : Plein écran immersif pour dessiner
+ * 2. MODE VJING DRAW : Plein écran immersif pour performer
+ * 3. MODE EDITOR : Ajuster les paramètres
  */
-function ArtisticVJ({ layers, audioData, onUpdateLayer }) {
+function ArtisticVJ({ layers, audioData, onUpdateLayer, audioAnalyzer, onAudioSelect, currentAudioName }) {
   const [currentMode, setCurrentMode] = useState('psychedelic')
   const [isVJingDrawMode, setIsVJingDrawMode] = useState(false)
+  const [isEditorMode, setIsEditorMode] = useState(false)
   const [currentShapeData, setCurrentShapeData] = useState(null)
   const canvasRef = useRef(null)
   const animationFrameRef = useRef(null)
@@ -200,11 +203,57 @@ function ArtisticVJ({ layers, audioData, onUpdateLayer }) {
     )
   }
 
+  // Si en mode Editor
+  if (isEditorMode) {
+    return (
+      <div className="artistic-vj editor-mode">
+        <div className="editor-container">
+          <header className="editor-header">
+            <button className="back-btn" onClick={() => setIsEditorMode(false)}>
+              ← Retour
+            </button>
+            <h2>🛠️ Mode Editor</h2>
+          </header>
+          
+          <div className="editor-content">
+            <div className="editor-section">
+              <h3>Layers</h3>
+              <div className="layers-list">
+                {layers.map(layer => (
+                  <div key={layer.id} className="layer-card">
+                    <span>{layer.name}</span>
+                    <button onClick={() => onUpdateLayer(layer.id, { visible: !layer.visible })}>
+                      {layer.visible ? '👁️' : '👁️‍🗨️'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="editor-section">
+              <h3>Mode: {currentMode}</h3>
+              <ModeSelector 
+                currentMode={currentMode}
+                onModeChange={setCurrentMode}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // Sinon, mode Selection
   return (
     <div className="artistic-vj selection-mode">
       {/* Mode Selector - Floating top-left */}
       <div className="mode-selector-container">
+        {/* Audio Source Selector */}
+        <AudioSourceSelector
+          onAudioSelect={onAudioSelect}
+          currentAudioName={currentAudioName}
+        />
+        
         <ModeSelector 
           currentMode={currentMode}
           onModeChange={setCurrentMode}
@@ -220,6 +269,15 @@ function ArtisticVJ({ layers, audioData, onUpdateLayer }) {
             <span className="btn-text">START VJing Draw</span>
           </button>
         )}
+        
+        {/* Editor button */}
+        <button 
+          className="editor-btn"
+          onClick={() => setIsEditorMode(true)}
+        >
+          <span className="btn-icon">🛠️</span>
+          <span className="btn-text">Mode Editor</span>
+        </button>
       </div>
 
       {/* Audio visualizer - Floating bottom */}

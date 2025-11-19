@@ -6,6 +6,7 @@ import './App.css'
 function App() {
   const [layers, setLayers] = useState([])
   const [audioData, setAudioData] = useState({ bass: 0, mid: 0, high: 0, overall: 0 })
+  const [currentAudioName, setCurrentAudioName] = useState(null)
   const audioAnalyzerRef = useRef(null)
   const animationFrameRef = useRef(null)
   const fileInputRef = useRef(null)
@@ -115,6 +116,20 @@ function App() {
     e.target.value = '' // Reset input
   }
 
+  // Gérer sélection audio source dédiée
+  const handleAudioSelect = (file) => {
+    const url = URL.createObjectURL(file)
+    const audio = new Audio(url)
+    audio.loop = true
+    audio.play()
+    
+    if (audioAnalyzerRef.current) {
+      audioAnalyzerRef.current.connectAudio(audio)
+    }
+    
+    setCurrentAudioName(file.name)
+  }
+
   return (
     <div className="app artistic-mode">
       {/* Hidden file input */}
@@ -155,6 +170,9 @@ function App() {
           layers={layers}
           audioData={audioData}
           onUpdateLayer={updateLayer}
+          audioAnalyzer={audioAnalyzerRef.current}
+          onAudioSelect={handleAudioSelect}
+          currentAudioName={currentAudioName}
         />
       </main>
 

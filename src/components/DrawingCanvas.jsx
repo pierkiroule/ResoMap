@@ -225,97 +225,23 @@ function DrawingCanvas({ onShapeDetected, audioData, mode }) {
     }
   }, [onShapeDetected])
 
-  // Animation loop pour render les trails
+  // Cleanup des trails expirés (sans les afficher)
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const ctx = canvas.getContext('2d')
-    const rect = canvas.getBoundingClientRect()
-    canvas.width = rect.width * window.devicePixelRatio
-    canvas.height = rect.height * window.devicePixelRatio
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
-
-    const render = () => {
-      // Clear canvas
-      ctx.clearRect(0, 0, rect.width, rect.height)
-
+    const cleanup = setInterval(() => {
       const now = Date.now()
-      const trailLifetime = 2000 // 2 secondes
-
-      // Render tous les trails
+      const trailLifetime = 500 // Garder en mémoire 500ms pour la détection
+      
       trailsRef.current = trailsRef.current.filter(trail => {
         const age = now - (trail.endTime || now)
-        if (!trail.active && age > trailLifetime) return false
-
-        const opacity = trail.active ? 1 : 1 - (age / trailLifetime)
-        
-        if (trail.points.length < 2) return true
-
-        // Audio-reactive glow
-        const bass = audioData?.bass || 0
-        const glowSize = 10 + bass * 30
-
-        ctx.strokeStyle = trail.color
-        ctx.lineWidth = 3 + bass * 5
-        ctx.lineCap = 'round'
-        ctx.lineJoin = 'round'
-        ctx.globalAlpha = opacity
-
-        // Glow effect
-        ctx.shadowColor = trail.color
-        ctx.shadowBlur = glowSize
-        
-        // Draw trail path
-        ctx.beginPath()
-        const firstPoint = trail.points[0]
-        ctx.moveTo(firstPoint.x * rect.width, firstPoint.y * rect.height)
-        
-        for (let i = 1; i < trail.points.length; i++) {
-          const point = trail.points[i]
-          ctx.lineTo(point.x * rect.width, point.y * rect.height)
-        }
-        
-        ctx.stroke()
-
-        // Draw points pour effet de particules
-        trail.points.forEach((point, i) => {
-          if (i % 5 === 0) { // Un point sur 5
-            const pointOpacity = opacity * (1 - i / trail.points.length) * 0.5
-            ctx.globalAlpha = pointOpacity
-            ctx.fillStyle = trail.color
-            ctx.beginPath()
-            ctx.arc(
-              point.x * rect.width,
-              point.y * rect.height,
-              2 + bass * 3,
-              0,
-              Math.PI * 2
-            )
-            ctx.fill()
-          }
-        })
-
-        return true
+        return trail.active || age < trailLifetime
       })
+    }, 100)
 
-      ctx.globalAlpha = 1
-      ctx.shadowBlur = 0
-
-      animationFrameRef.current = requestAnimationFrame(render)
-    }
-
-    render()
-
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current)
-      }
-    }
-  }, [audioData])
+    return () => clearInterval(cleanup)
+  }, [])
 
   return (
-    <canvas 
+    <div 
       ref={canvasRef} 
       className="drawing-canvas"
       style={{ touchAction: 'none' }}
