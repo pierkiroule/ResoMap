@@ -1,25 +1,26 @@
 import { useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Box from '../components/Box.jsx';
 import CosmojiGraph from '../components/Cosmoji.jsx';
+import { useFlow } from '../context/FlowContext.jsx';
 
 const Cosmoji = () => {
   const navigate = useNavigate();
-  const { state } = useLocation();
-  const selections = state?.selections;
-  const haiku = state?.haiku;
+  const { selections, haiku, hasCompleteSelection, resetFlow } = useFlow();
 
   useEffect(() => {
-    if (!selections) {
+    if (!hasCompleteSelection) {
       navigate('/tirage', { replace: true });
+    } else if (!haiku) {
+      navigate('/haiku', { replace: true });
     }
-  }, [navigate, selections]);
+  }, [haiku, hasCompleteSelection, navigate]);
 
-  if (!selections) return null;
+  if (!hasCompleteSelection || !haiku) return null;
 
   const footer = (
     <>
-      <Link className="primary-btn" to="/">
+      <Link className="primary-btn" to="/" onClick={resetFlow}>
         Recommencer
       </Link>
     </>

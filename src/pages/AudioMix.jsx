@@ -1,34 +1,28 @@
 import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Box from '../components/Box.jsx';
 import AudioSampler from '../components/AudioSampler.jsx';
+import { useFlow } from '../context/FlowContext.jsx';
 
 const AudioMix = () => {
   const navigate = useNavigate();
-  const { state } = useLocation();
-  const selections = state?.selections;
-  const haiku = state?.haiku;
+  const { selections, haiku, hasCompleteSelection } = useFlow();
 
   useEffect(() => {
-    if (!selections) {
+    if (!hasCompleteSelection) {
       navigate('/tirage', { replace: true });
+    } else if (!haiku) {
+      navigate('/haiku', { replace: true });
     }
-  }, [navigate, selections]);
+  }, [haiku, hasCompleteSelection, navigate]);
 
-  if (!selections) return null;
+  if (!hasCompleteSelection || !haiku) return null;
 
   const footer = (
     <button
       type="button"
       className="primary-btn"
-      onClick={() =>
-        navigate('/videomix', {
-          state: {
-            selections,
-            haiku,
-          },
-        })
-      }
+      onClick={() => navigate('/videomix')}
     >
       Vers la vidéo
     </button>

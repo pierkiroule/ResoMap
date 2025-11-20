@@ -102,6 +102,23 @@ body {
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
+.secondary-btn {
+  border: 1px solid rgba(108, 78, 246, 0.5);
+  border-radius: 999px;
+  padding: 0.85rem 1.8rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: #6c4ef6;
+  transition: background 0.25s ease, color 0.25s ease, border 0.25s ease;
+}
+
+.secondary-btn:hover {
+  background: rgba(108, 78, 246, 0.08);
+  border-color: #6c4ef6;
+}
+
 .primary-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
