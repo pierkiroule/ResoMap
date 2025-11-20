@@ -1,35 +1,38 @@
-import { useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Box from '../components/Box.jsx';
 import { generateHaiku } from '../components/HaikuGenerator.jsx';
+import { useFlow } from '../context/FlowContext.jsx';
 
 const Haiku = () => {
   const navigate = useNavigate();
-  const { state } = useLocation();
-  const selections = state?.selections;
+  const { haiku, setHaiku, hasCompleteSelection } = useFlow();
 
   useEffect(() => {
-    if (!selections) {
+    if (!hasCompleteSelection) {
       navigate('/tirage', { replace: true });
+      return;
     }
-  }, [navigate, selections]);
+    if (!haiku) {
+      setHaiku(generateHaiku());
+    }
+  }, [haiku, hasCompleteSelection, navigate, setHaiku]);
 
-  const haiku = useMemo(() => generateHaiku(), [selections]);
+  if (!hasCompleteSelection) return null;
 
-  if (!selections) return null;
+  if (!haiku) {
+    return (
+      <Box title="Haïku">
+        <p>Invocation du haïku en cours...</p>
+      </Box>
+    );
+  }
 
   const footer = (
     <button
       type="button"
       className="primary-btn"
-      onClick={() =>
-        navigate('/triptyque', {
-          state: {
-            selections,
-            haiku,
-          },
-        })
-      }
+      onClick={() => navigate('/triptyque')}
     >
       Continuer
     </button>

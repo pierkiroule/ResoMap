@@ -1,34 +1,24 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Box from '../components/Box.jsx';
 import EmojiPicker from '../components/EmojiPicker.jsx';
+import { useFlow } from '../context/FlowContext.jsx';
 
 const Tirage = () => {
   const navigate = useNavigate();
-  const [selection, setSelection] = useState({
-    dissonance: null,
-    profondeur: null,
-    mojonance: null,
-  });
+  const { selections, updateSelection } = useFlow();
 
   const handleSelect = (category) => (emoji) => {
-    setSelection((prev) => ({ ...prev, [category]: emoji }));
+    updateSelection(category, emoji);
   };
 
-  const ready = Object.values(selection).every(Boolean);
+  const ready = Object.values(selections).every(Boolean);
 
   const footer = (
     <button
       type="button"
       className="primary-btn"
       disabled={!ready}
-      onClick={() =>
-        navigate('/haiku', {
-          state: {
-            selections: selection,
-          },
-        })
-      }
+      onClick={() => navigate('/haiku')}
     >
       Générer un haïku
     </button>
@@ -38,9 +28,9 @@ const Tirage = () => {
     <Box title="Tirage" footer={footer}>
       <p>Choisissez un symbole dans chaque famille pour créer votre combinaison.</p>
       <div className="emoji-pickers">
-        <EmojiPicker category="dissonance" onSelect={handleSelect('dissonance')} selected={selection.dissonance} />
-        <EmojiPicker category="profondeur" onSelect={handleSelect('profondeur')} selected={selection.profondeur} />
-        <EmojiPicker category="mojonance" onSelect={handleSelect('mojonance')} selected={selection.mojonance} />
+        <EmojiPicker category="dissonance" onSelect={handleSelect('dissonance')} selected={selections.dissonance} />
+        <EmojiPicker category="profondeur" onSelect={handleSelect('profondeur')} selected={selections.profondeur} />
+        <EmojiPicker category="mojonance" onSelect={handleSelect('mojonance')} selected={selections.mojonance} />
       </div>
     </Box>
   );
